@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Construct URL
-    const url = `${request.nextUrl.origin}/p/${id}`
+    const url = `${request.nextUrl.origin}/pastes/${id}`
 
     return NextResponse.json({ id, url })
   } catch (error) {
