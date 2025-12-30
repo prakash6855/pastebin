@@ -4,8 +4,8 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import styles from './Paste.module.css'
 
-function getCurrentTime(): Date {
-  const headersList = headers()
+async function getCurrentTime(): Promise<Date> {
+  const headersList = await headers()
   if (process.env.TEST_MODE === '1') {
     const testNowMs = headersList.get('x-test-now-ms')
     if (testNowMs) {
@@ -19,7 +19,7 @@ function getCurrentTime(): Date {
 }
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 /**
@@ -27,8 +27,8 @@ interface PageProps {
  * Fetches paste data server-side and handles 404s for expired/missing pastes.
  */
 export default async function PasteViewPage({ params }: PageProps) {
-  const { id } = params
-  const now = getCurrentTime()
+  const { id } = await params
+  const now = await getCurrentTime()
 
   try {
     const paste = await pasteStore.getPaste(id)

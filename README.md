@@ -4,8 +4,8 @@ A simple, lightweight pastebin application for creating and sharing text pastes 
 
 ## Technologies Used
 
-- **Next.js 14.2.15**: React framework for full-stack web development
-- **React 18**: UI library for building interactive interfaces
+- **Next.js 16**: React framework for full-stack web development
+- **React 19**: UI library for building interactive interfaces
 - **TypeScript 5**: Typed JavaScript for better code quality
 - **Redis**: In-memory data structure store for pastes
 - **nanoid**: Library for generating unique paste IDs
@@ -80,8 +80,6 @@ I chose **Redis** as the persistence layer for this application.
 - `npm run dev`: Start development server
 - `npm run build`: Build for production
 - `npm run start`: Start production server
-- `npm run lint`: Run ESLint
-
 - `npm run lint`: Run ESLint
 
 ## Testing

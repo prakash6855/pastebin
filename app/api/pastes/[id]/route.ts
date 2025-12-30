@@ -23,9 +23,9 @@ function getCurrentTime(request: NextRequest): Date {
  * Checks for expiry and view limits before returning.
  * Increments view count on success.
  */
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
     const now = getCurrentTime(request)
 
     // Find the paste
