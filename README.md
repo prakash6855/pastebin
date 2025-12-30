@@ -18,6 +18,22 @@ A simple, lightweight pastebin application for creating and sharing text pastes 
 - Unique URLs for each paste
 - RESTful API for programmatic access
 
+## Persistence & Design Decisions
+
+### Persistence Layer: Redis
+
+I chose **Redis** as the persistence layer for this application.
+
+- **Reasoning**: Redis is an in-memory key-value store that is extremely fast, making it ideal for a pastebin service where read/write performance is critical.
+- **TTL Support**: Redis has native support for Time-To-Live (TTL) expiration, which simplifies the implementation of the auto-expiry feature.
+- **Atomic Operations**: Redis supports atomic increments, which ensures accurate view counting even under concurrent load.
+
+### Design Decisions
+
+- **URL Structure**: The application uses `/p/[id]` for the public view to keep URLs short and user-friendly.
+- **Deterministic Testing**: To ensure reliable testing of time-based features (TTL), the application supports a `TEST_MODE` environment variable and an `x-test-now-ms` header to mock the current time.
+- **Stateless API**: The API is designed to be stateless, relying on Redis for all shared state, making it suitable for serverless deployments (like Vercel).
+
 ## Installation
 
 1. Clone the repository:
@@ -65,6 +81,34 @@ A simple, lightweight pastebin application for creating and sharing text pastes 
 - `npm run build`: Build for production
 - `npm run start`: Start production server
 - `npm run lint`: Run ESLint
+
+- `npm run lint`: Run ESLint
+
+## Testing
+
+The repository includes a comprehensive end-to-end test script `e2e-test.js` that verifies all functional requirements, including:
+
+- Health checks
+- Paste creation and retrieval (API & HTML)
+- View limits enforcement
+- Time-to-live (TTL) expiration (using deterministic time mocking)
+- Error handling and edge cases
+
+### Running Tests Locally
+
+1. Ensure the application is running (e.g., on `http://localhost:3000`).
+2. Ensure Redis is accessible.
+3. Run the test script:
+
+   ```bash
+   # Default (targets localhost:3000)
+   node e2e-test.js
+
+   # Custom URL (e.g., if running on port 3001)
+   BASE_URL=http://localhost:3001 node e2e-test.js
+   ```
+
+   The script will output `PASS` for each test case and `ALL TESTS PASSED!` upon success.
 
 ## Contributing
 

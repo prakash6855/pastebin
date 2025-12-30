@@ -8,6 +8,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - NODE_ENV=production
+      - TEST_MODE=1
     ports:
       - "3000:3000"
     depends_on:
