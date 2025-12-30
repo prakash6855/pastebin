@@ -1,117 +1,126 @@
-# Pastebin
+# Pastebin-Lite
 
-A simple, lightweight pastebin application for creating and sharing text pastes with optional expiration and view limits.
+A robust, high-performance pastebin application built with the latest web technologies. Create, share, and manage text pastes with advanced features like auto-expiration and view limits.
 
-## Technologies Used
+## 🚀 Features
 
-- **Next.js 16**: React framework for full-stack web development
-- **React 19**: UI library for building interactive interfaces
-- **TypeScript 5**: Typed JavaScript for better code quality
-- **Redis**: In-memory data structure store for pastes
-- **nanoid**: Library for generating unique paste IDs
+- **Instant Sharing**: Create pastes with arbitrary text and get a unique, shareable URL immediately.
+- **Auto-Expiration (TTL)**: Set a Time-To-Live (in seconds) for your pastes. They vanish automatically when the time is up.
+- **View Limits**: Restrict the number of times a paste can be viewed. Once the limit is reached, the paste is deleted.
+- **Combined Constraints**: Apply both TTL and view limits; the paste expires whichever condition is met first.
+- **Secure & Fast**: Built for speed and security with server-side rendering and efficient caching.
 
-## Features
+## 🛠️ Technology Stack
 
-- Create and share text pastes
-- Optional time-to-live (TTL) for automatic expiration
-- Optional maximum view count before deletion
-- Unique URLs for each paste
-- RESTful API for programmatic access
+- **Next.js 16**: Utilizing the latest App Router for server-centric routing and optimized performance.
+- **React 19**: Leveraging the newest React features for a seamless UI.
+- **TypeScript 5**: Ensuring type safety and code reliability.
+- **Redis**: High-performance in-memory key-value store for persistence.
+- **Docker**: Containerized for consistent deployment across environments.
 
-## Persistence & Design Decisions
+## 💡 Architecture & Design Decisions
 
 ### Persistence Layer: Redis
 
-I chose **Redis** as the persistence layer for this application.
+I selected **Redis** as the primary data store for several critical reasons:
 
-- **Reasoning**: Redis is an in-memory key-value store that is extremely fast, making it ideal for a pastebin service where read/write performance is critical.
-- **TTL Support**: Redis has native support for Time-To-Live (TTL) expiration, which simplifies the implementation of the auto-expiry feature.
-- **Atomic Operations**: Redis supports atomic increments, which ensures accurate view counting even under concurrent load.
+1.  **Performance**: Redis offers sub-millisecond O(1) read/write latency, which is essential for a high-traffic pastebin service.
+2.  **Native TTL Support**: Redis has built-in support for key expiration (`EXPIRE`). This simplifies the "Time-To-Live" feature significantly, as we don't need a separate background worker to clean up expired pastes.
+3.  **Atomic Counters**: The `INCR` and `HINCRBY` operations allow for race-condition-free view counting, ensuring that view limits are strictly enforced even under high concurrency.
 
-### Design Decisions
+### Key Design Choices
 
-- **URL Structure**: The application uses `/p/[id]` for the public view to keep URLs short and user-friendly.
-- **Deterministic Testing**: To ensure reliable testing of time-based features (TTL), the application supports a `TEST_MODE` environment variable and an `x-test-now-ms` header to mock the current time.
-- **Stateless API**: The API is designed to be stateless, relying on Redis for all shared state, making it suitable for serverless deployments (like Vercel).
+- **Stateless API**: The application is fully stateless, delegating all state management to Redis. This makes the app horizontally scalable and perfect for serverless platforms (like Vercel) or container orchestration (Kubernetes).
+- **URL Structure**: We use a concise `/p/[id]` structure for public paste views to keep URLs short and user-friendly, while the API lives under `/api/pastes`.
+- **Deterministic Testing**: Testing time-based features (like TTL) can be flaky. I implemented a `TEST_MODE` that respects a custom `x-test-now-ms` header, allowing our end-to-end tests to "time travel" and verify expiration logic deterministically.
 
-## Installation
+## 📦 Installation & Running
 
-1. Clone the repository:
+### Option 1: Docker (Recommended)
 
-   ```bash
-   git clone <repository-url>
-   cd pastebin
-   ```
+The easiest way to run the application is with Docker Compose. This sets up both the application and the Redis database automatically.
 
-2. Run with Docker (Recommended):
+```bash
+# Clone the repository
+git clone https://github.com/prakash6855/pastebin.git
+cd pastebin
 
-   ```bash
-   docker-compose up --build
-   ```
+# Start the application
+sudo docker-compose up --build
+```
 
-   The application will be available at [http://localhost:3000](http://localhost:3000).
+The app will be available at **[http://localhost:3000](http://localhost:3000)**.
 
-3. Or run manually:
+### Option 2: Manual Setup
 
-   - Ensure Redis is running locally.
-   - Set `REDIS_URL` in `.env` (e.g., `redis://localhost:6379`).
-   - Install dependencies and start server:
-     ```bash
-     npm install
-     npm run dev
-     ```
+If you prefer to run it without Docker:
 
-## Usage
+1.  **Prerequisites**: Ensure you have Node.js 20+ and a running Redis instance.
+2.  **Configuration**: Create a `.env` file (or set env vars) with your Redis URL:
+    ```env
+    REDIS_URL=redis://localhost:6379
+    ```
+3.  **Install & Run**:
+    ```bash
+    npm install
+    npm run dev
+    ```
 
-### Web Interface
+## 🧪 Testing
 
-- Visit the homepage to create a new paste.
-- Enter your text, set optional TTL and max views.
-- Share the generated URL.
+We prioritize reliability. The project includes a comprehensive end-to-end (E2E) test suite that verifies every functional requirement.
 
-### API Endpoints
+### Running Tests
 
-- `GET /api/healthz`: Health check
-- `POST /api/pastes`: Create a new paste
-- `GET /api/pastes/[id]`: Retrieve a paste by ID
+Ensure your application is running (via Docker or manually), then execute the test script:
 
-## Scripts
+```bash
+# Run tests against localhost:3000
+node e2e-test.js
 
-- `npm run dev`: Start development server
-- `npm run build`: Build for production
-- `npm run start`: Start production server
-- `npm run lint`: Run ESLint
+# Or target a specific port
+BASE_URL=http://localhost:3001 node e2e-test.js
+```
 
-## Testing
+### What is Tested?
 
-The repository includes a comprehensive end-to-end test script `e2e-test.js` that verifies all functional requirements, including:
+- **Health Checks**: Verifies API and Database connectivity.
+- **Core Flows**: Creating and retrieving pastes (both JSON API and HTML view).
+- **Constraint Enforcement**:
+  - Verifies pastes expire exactly after the TTL.
+  - Verifies pastes become unavailable after the Max Views limit is hit.
+  - Verifies combined constraints work as expected.
+- **Error Handling**: Checks for 404s on missing/expired pastes and 400s on invalid input.
 
-- Health checks
-- Paste creation and retrieval (API & HTML)
-- View limits enforcement
-- Time-to-live (TTL) expiration (using deterministic time mocking)
-- Error handling and edge cases
+## 📡 API Reference
 
-### Running Tests Locally
+### Health Check
 
-1. Ensure the application is running (e.g., on `http://localhost:3000`).
-2. Ensure Redis is accessible.
-3. Run the test script:
+- **GET** `/api/healthz`
+- Returns: `{ "ok": true }`
 
-   ```bash
-   # Default (targets localhost:3000)
-   node e2e-test.js
+### Create Paste
 
-   # Custom URL (e.g., if running on port 3001)
-   BASE_URL=http://localhost:3001 node e2e-test.js
-   ```
+- **POST** `/api/pastes`
+- Body: `{ "content": "text", "ttl_seconds": 60, "max_views": 5 }`
+- Returns: `{ "id": "...", "url": "..." }`
 
-   The script will output `PASS` for each test case and `ALL TESTS PASSED!` upon success.
+### Get Paste
 
-## Contributing
+- **GET** `/api/pastes/:id`
+- Returns: `{ "content": "...", "remaining_views": 3, "expires_at": "..." }`
 
-Contributions are welcome! Please open an issue or submit a pull request.
+## 📜 Scripts
 
-## License
+- `npm run dev`: Start development server.
+- `npm run build`: Build for production.
+- `npm run start`: Start production server.
+- `npm run lint`: Run code linting.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+## 📄 License
 
 This project is licensed under the MIT License.
