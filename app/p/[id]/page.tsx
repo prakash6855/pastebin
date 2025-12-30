@@ -22,7 +22,11 @@ interface PageProps {
   params: { id: string }
 }
 
-export default async function PastePage({ params }: PageProps) {
+/**
+ * Page component for viewing a specific paste.
+ * Fetches paste data server-side and handles 404s for expired/missing pastes.
+ */
+export default async function PasteViewPage({ params }: PageProps) {
   const { id } = params
   const now = getCurrentTime()
 

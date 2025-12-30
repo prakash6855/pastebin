@@ -2,12 +2,18 @@ import { pasteStore } from '@/lib/paste-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
 
+/**
+ * Create a new paste.
+ * Accepts content, ttl_seconds, and max_views in the request body.
+ * @param request - The incoming request object.
+ * @returns JSON response with the new paste ID and URL.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { content, ttl_seconds, max_views } = body
 
-    // Validation
+    // --- Validation ---
     if (!content || typeof content !== 'string' || content.trim() === '') {
       return NextResponse.json({ error: 'Content is required and must be a non-empty string' }, { status: 400 })
     }
@@ -27,8 +33,8 @@ export async function POST(request: NextRequest) {
     const createdAt = new Date()
     const expiresAt = ttl_seconds ? new Date(createdAt.getTime() + ttl_seconds * 1000) : null
 
-    // Create paste
-    const paste = await pasteStore.createPaste({
+    // Create paste in store
+    await pasteStore.createPaste({
       id,
       content,
       ttlSeconds: ttl_seconds,
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
       expiresAt,
     })
 
-    // Construct URL
+    // Construct URL (using /p/ for view path as per requirements)
     const url = `${request.nextUrl.origin}/p/${id}`
 
     return NextResponse.json({ id, url })

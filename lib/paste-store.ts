@@ -1,16 +1,31 @@
 import { redis } from './redis'
 
 export interface Paste {
+  /** Unique identifier for the paste */
   id: string
+  /** The content of the paste */
   content: string
+  /** Optional time-to-live in seconds */
   ttlSeconds?: number
+  /** Optional maximum number of views */
   maxViews?: number
+  /** ISO timestamp of creation */
   createdAt: string
+  /** Current number of views */
   viewsCount: number
+  /** ISO timestamp of expiration, if applicable */
   expiresAt?: string
 }
 
+/**
+ * Store for managing Paste operations against Redis.
+ */
 export const pasteStore = {
+  /**
+   * Creates a new paste in Redis.
+   * @param data - The paste data to store.
+   * @returns The stored paste data.
+   */
   async createPaste(data: {
     id: string
     content: string
@@ -32,8 +47,10 @@ export const pasteStore = {
     if (data.maxViews) pasteData.maxViews = data.maxViews
     if (data.expiresAt) pasteData.expiresAt = data.expiresAt.toISOString()
 
+    // Store paste data as a hash
     pipeline.hset(key, pasteData)
 
+    // Set TTL on the key if provided
     if (data.ttlSeconds) {
       pipeline.expire(key, data.ttlSeconds)
     }
@@ -42,6 +59,11 @@ export const pasteStore = {
     return data
   },
 
+  /**
+   * Retrieves a paste by its ID.
+   * @param id - The unique identifier of the paste.
+   * @returns The paste object or null if not found.
+   */
   async getPaste(id: string): Promise<Paste | null> {
     const key = `paste:${id}`
     const data = await redis.hgetall(key)
@@ -61,11 +83,19 @@ export const pasteStore = {
     }
   },
 
+  /**
+   * Increments the view count for a paste.
+   * @param id - The unique identifier of the paste.
+   */
   async incrementViews(id: string) {
     const key = `paste:${id}`
     await redis.hincrby(key, 'viewsCount', 1)
   },
 
+  /**
+   * Checks the health of the Redis connection.
+   * @returns 'PONG' if healthy.
+   */
   async checkHealth() {
     return redis.ping()
   },

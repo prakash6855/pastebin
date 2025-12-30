@@ -1,6 +1,10 @@
 import { pasteStore } from '@/lib/paste-store'
 import { NextRequest, NextResponse } from 'next/server'
 
+/**
+ * Helper to get the current time, supporting deterministic testing.
+ * Checks for `x-test-now-ms` header if `TEST_MODE` is enabled.
+ */
 function getCurrentTime(request: NextRequest): Date {
   if (process.env.TEST_MODE === '1') {
     const testNowMs = request.headers.get('x-test-now-ms')
@@ -14,6 +18,11 @@ function getCurrentTime(request: NextRequest): Date {
   return new Date()
 }
 
+/**
+ * Retrieve a paste by ID.
+ * Checks for expiry and view limits before returning.
+ * Increments view count on success.
+ */
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params
