@@ -1,4 +1,4 @@
-# Pastebin-Lite
+# Pastebin
 
 A robust, high-performance pastebin application built with the latest web technologies. Create, share, and manage text pastes with advanced features like auto-expiration and view limits.
 
@@ -126,3 +126,4 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 ## 📄 License
 
 This project is licensed under the MIT License.
+
