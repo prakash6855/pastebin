@@ -2,6 +2,8 @@
 
 A robust, high-performance pastebin application built with the latest web technologies. Create, share, and manage text pastes with advanced features like auto-expiration and view limits.
 
+[**Live Demo**](https://pastebin-ebon.vercel.app)
+
 ## 🚀 Features
 
 - **Instant Sharing**: Create pastes with arbitrary text and get a unique, shareable URL immediately.
